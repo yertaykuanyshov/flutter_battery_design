@@ -69,26 +69,22 @@ class BatteryProgress extends CustomPainter {
       ..color = Colors.teal.withOpacity(opacity)
       ..filterQuality = FilterQuality.low;
 
-    final path = Path();
-    path.addOval(Rect.fromCircle(
-      center: Offset(size.width / position, size.height / position),
-      radius: 30 - position * 10,
-    ));
+    for (int a = 1; a <= 100; a++) {
+      final path = Path();
+      path.addOval(
+        Rect.fromCircle(
+          center: Offset(
+            size.width / position,
+            size.height / position,
+          ),
+          radius: 30 - position * 10,
+        ),
+      );
 
-    final path2 = Path();
-    path2.addOval(
-      Rect.fromCircle(
-        center: Offset(size.width / position, size.height / 2),
-        radius: 30 - position * 10,
-      ),
-    );
-
-    canvas.drawPath(path, paint);
-    canvas.drawPath(path2, paint);
+      canvas.drawPath(path, paint);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(_) => true;
 }
