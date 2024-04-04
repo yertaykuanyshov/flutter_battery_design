@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,7 +19,7 @@ class _BatteryAppState extends State<BatteryApp> {
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(milliseconds: 20), (timer) {
+    Timer.periodic(const Duration(milliseconds: 16), (timer) {
       setState(() {
         if (position < 2) {
           position += 0.01;
@@ -55,34 +53,30 @@ class BatteryProgress extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double opacity = 1.0;
-
-    if (position > 1) {
-      opacity = 1.0 - (position - 1.0);
-
-      if (opacity < 0) {
-        opacity = 0;
-      }
-    }
-
     final paint = Paint()
-      ..color = Colors.teal.withOpacity(opacity)
+      ..color = Colors.red
       ..filterQuality = FilterQuality.low;
 
-    for (int a = 1; a <= 100; a++) {
-      final path = Path();
-      path.addOval(
-        Rect.fromCircle(
-          center: Offset(
-            size.width / position,
-            size.height / position,
-          ),
-          radius: 30 - position * 10,
-        ),
-      );
+    final path = Path();
 
-      canvas.drawPath(path, paint);
-    }
+    path.addOval(
+      Rect.fromCircle(
+        center: Offset(size.width / position, size.height / position),
+        radius: 30 - position * 15,
+      ),
+    );
+
+    var position2 = position - 0.5;
+
+    path.addOval(
+      Rect.fromCircle(
+        center: Offset(
+            (size.width / position2) + 10, (size.height / position2) + 10),
+        radius: 30 - position2 * 15,
+      ),
+    );
+
+    canvas.drawPath(path, paint);
   }
 
   @override
