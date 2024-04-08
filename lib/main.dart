@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_battery_design/point.dart';
 
 void main() {
   runApp(const BatteryApp());
@@ -13,18 +15,22 @@ class BatteryApp extends StatefulWidget {
 }
 
 class _BatteryAppState extends State<BatteryApp> {
-  double position = 1;
+  final StreamController<int> _controller = StreamController();
+
+  double _position = 1;
 
   @override
   void initState() {
     super.initState();
 
-    Timer.periodic(const Duration(milliseconds: 16), (timer) {
+    _controller.sink.add(1);
+
+    Timer.periodic(const Duration(microseconds: 1000000), (timer) {
       setState(() {
-        if (position < 2) {
-          position += 0.01;
+        if (_position < 2) {
+          _position += (2 / 100);
         } else {
-          position = 0.9;
+          _position = 1;
         }
       });
     });
@@ -33,12 +39,41 @@ class _BatteryAppState extends State<BatteryApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.black,
+      ),
       home: Scaffold(
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,
           child: CustomPaint(
-            painter: BatteryProgress(position),
+            painter: BatteryProgress([
+              BatteryPoint(
+                radius: 10,
+                timer: _position,
+                position: BatteryPointPosition.top,
+              ),
+              BatteryPoint(
+                radius: 50,
+                timer: _position,
+                position: BatteryPointPosition.bottom,
+              ),
+              BatteryPoint(
+                radius: 20,
+                timer: _position,
+                position: BatteryPointPosition.right,
+              ),
+              BatteryPoint(
+                radius: 30,
+                timer: _position,
+                position: BatteryPointPosition.left,
+              ),
+              BatteryPoint(
+                radius: 30,
+                timer: _position,
+                position: BatteryPointPosition.bottomLeft,
+              ),
+            ]),
           ),
         ),
       ),
@@ -47,38 +82,66 @@ class _BatteryAppState extends State<BatteryApp> {
 }
 
 class BatteryProgress extends CustomPainter {
-  BatteryProgress(this.position);
+  BatteryProgress(this.points);
 
-  final double position;
+  final List<BatteryPoint> points;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red
-      ..filterQuality = FilterQuality.low;
+    final paint = Paint()..color = Colors.teal;
 
     final path = Path();
 
-    path.addOval(
-      Rect.fromCircle(
-        center: Offset(size.width / position, size.height / position),
-        radius: 30 - position * 15,
-      ),
-    );
+    for (BatteryPoint point in points) {
+      final percent = (point.timer - 1) * 100;
+      final radius = point.radius - (point.radius / 100) * percent;
 
-    var position2 = position - 0.5;
+      if (point.position == BatteryPointPosition.left) {
+        final width = size.width - size.width - 50;
+        final centerOffset = size.width / 2 + 50;
 
-    path.addOval(
-      Rect.fromCircle(
-        center: Offset(
-            (size.width / position2) + 10, (size.height / position2) + 10),
-        radius: 30 - position2 * 15,
-      ),
-    );
+        final offset = width + (centerOffset / 100) * percent.toInt();
+
+        path.addOval(Rect.fromCircle(
+          center: Offset(offset, size.height / 2),
+          radius: radius,
+        ));
+      }
+
+      if (point.position == BatteryPointPosition.bottom) {
+        path.addOval(Rect.fromCircle(
+          center: Offset(
+            size.width / 2,
+            size.height / point.timer,
+          ),
+          radius: radius,
+        ));
+      }
+
+      if (point.position == BatteryPointPosition.right) {
+        path.addOval(Rect.fromCircle(
+          center: Offset(
+            size.width / point.timer,
+            size.height / 2,
+          ),
+          radius: radius,
+        ));
+      }
+
+      if (point.position == BatteryPointPosition.bottomLeft) {
+        path.addOval(Rect.fromCircle(
+          center: Offset(
+            size.width / point.timer,
+            size.height / point.timer,
+          ),
+          radius: radius,
+        ));
+      }
+    }
 
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_) => true;
+  bool shouldRepaint(oldDelegate) => true;
 }
