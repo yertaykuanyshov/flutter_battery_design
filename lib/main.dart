@@ -16,16 +16,13 @@ class BatteryApp extends StatefulWidget {
 
 class _BatteryAppState extends State<BatteryApp> {
   final StreamController<int> _controller = StreamController();
-
   double _position = 1;
 
   @override
   void initState() {
     super.initState();
 
-    _controller.sink.add(1);
-
-    Timer.periodic(const Duration(microseconds: 1000000), (timer) {
+    Timer.periodic(const Duration(milliseconds: 30), (timer) {
       setState(() {
         if (_position < 2) {
           _position += (2 / 100);
@@ -40,7 +37,7 @@ class _BatteryAppState extends State<BatteryApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.black,
+        scaffoldBackgroundColor: Colors.black38,
       ),
       home: Scaffold(
         body: SizedBox(
